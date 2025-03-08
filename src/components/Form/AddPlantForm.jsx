@@ -2,14 +2,16 @@ import { useState } from "react";
 import { imageUpload } from "../../api/utils";
 import useAuth from "../../hooks/useAuth";
 import useAxiosSecure from "../../hooks/useAxiosSecure";
-import toast, { Toaster } from "react-hot-toast";
+import { Bounce, toast, ToastContainer } from "react-toastify";
 
 const AddPlantForm = () => {
   const [uploadText, setUploadText] = useState("");
+  const [loading, setLoading] = useState(false);
   const { user } = useAuth();
   const axiosSecure = useAxiosSecure();
   const handleSubmit = async e => {
     e.preventDefault();
+    setLoading(true);
     const form = e.target;
     const name = form.name.value;
     const price = form.price.value;
@@ -31,15 +33,24 @@ const AddPlantForm = () => {
         image: user?.photoURL
       }
     }
-    axiosSecure.post("/plants", plantData)
-      .then(res => {
-        if (res.data.insertedId) {
-          toast.success("Plant Added Success!")
-          form.reset();
-        }
-      }).catch(error => {
-        console.log(error.message);
-      })
+    await toast.promise(
+      axiosSecure.post("/plants", plantData)
+        .then(res => {
+          if (res.data.insertedId) {
+            setLoading(false);
+            setUploadText("")
+            console.log(res.data);
+            form.reset();
+          }
+        }).catch(error => {
+          console.log(error.message);
+        }),
+      {
+        pending: 'Adding',
+        success: 'Adding Success 👌',
+        error: 'Failed 🤯'
+      }
+    );
   }
   return (
     <div className='w-full min-h-[calc(100vh-40px)] flex flex-col justify-center items-center text-gray-800 rounded-xl bg-gray-50'>
@@ -153,12 +164,27 @@ const AddPlantForm = () => {
               type='submit'
               className='w-full p-3 mt-5 text-center font-medium text-white transition duration-200 rounded shadow-md bg-lime-500 '
             >
-              Save & Continue
+              {
+                loading ? "Uploading" : "Save & Continue"
+              }
+
             </button>
           </div>
         </div>
       </form>
-      <Toaster></Toaster>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        transition={Bounce}
+      />
     </div>
   )
 }
