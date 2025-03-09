@@ -6,6 +6,7 @@ import { Bounce, toast, ToastContainer } from "react-toastify";
 
 const AddPlantForm = () => {
   const [uploadText, setUploadText] = useState("");
+  const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
   const axiosSecure = useAxiosSecure();
@@ -140,7 +141,13 @@ const AddPlantForm = () => {
                 <div className='flex flex-col w-max mx-auto text-center'>
                   <label>
                     <input
-                      onChange={(e) => setUploadText(e.target.files[0])}
+                      onChange={(e) => {
+                        setUploadText(e.target.files[0]);
+                        const file = e.target.files[0];
+                        if (file) {
+                          setImage(URL.createObjectURL(file))
+                        }
+                      }}
                       className='text-sm cursor-pointer w-36 hidden'
                       type='file'
                       name='image'
@@ -159,7 +166,11 @@ const AddPlantForm = () => {
             </div>
 
             {/* Submit Button */}
-            {uploadText && <p>File Size: {uploadText.size} bytes</p>}
+            <div className="flex justify-evenly gap-4">
+              <img className="w-32" src={image} />
+              {uploadText && <p>File Size: {uploadText.size / 1024} kb</p>}
+            </div>
+
             <button
               type='submit'
               className='w-full p-3 mt-5 text-center font-medium text-white transition duration-200 rounded shadow-md bg-lime-500 '
