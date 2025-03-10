@@ -28,7 +28,7 @@ const AddPlantForm = () => {
       category,
       description,
       image: imageUrl,
-      user: {
+      seller: {
         name: user?.displayName,
         email: user?.email,
         image: user?.photoURL

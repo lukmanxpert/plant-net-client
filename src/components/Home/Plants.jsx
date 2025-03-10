@@ -7,9 +7,13 @@ const Plants = () => {
     queryKey: ["plants"],
     queryFn: async () => {
       const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/plants`)
+      if (data.length < 1) {
+        return null;
+      }
       return data;
     }
   })
+  console.log(plants);
   return (
     <Container>
       {
