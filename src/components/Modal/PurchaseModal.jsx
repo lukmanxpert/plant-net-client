@@ -6,10 +6,31 @@ import {
   DialogPanel,
   DialogTitle,
 } from '@headlessui/react'
-import { Fragment } from 'react'
+import { Fragment, useState } from 'react'
+import useAuth from '../../hooks/useAuth';
+import toast from 'react-hot-toast';
 
-const PurchaseModal = ({ closeModal, isOpen }) => {
-  // Total Price Calculation
+const PurchaseModal = ({ closeModal, isOpen, plant }) => {
+  const { user } = useAuth();
+  const { name, category, quantity, price } = plant;
+  const [totalQuantity, setTotalQuantity] = useState(1);
+
+  const handleQuantity = (q) => {
+    // Convert input value to number and handle empty input
+    const quantityNumber = q === "" ? "" : Number(q);
+
+    if (quantityNumber === "") {
+      setTotalQuantity(""); // Allow empty input temporarily
+    } else if (quantityNumber > quantity) {
+      toast.error("Total quantity exceeded!");
+      setTotalQuantity(quantity);
+    } else if (quantityNumber < 1) {
+      toast.error("Quantity cannot be less than 1!");
+      setTotalQuantity(1);
+    } else {
+      setTotalQuantity(quantityNumber);
+    }
+  };
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -45,20 +66,49 @@ const PurchaseModal = ({ closeModal, isOpen }) => {
                   Review Info Before Purchase
                 </DialogTitle>
                 <div className='mt-2'>
-                  <p className='text-sm text-gray-500'>Plant: Money Plant</p>
+                  <p className='text-sm text-gray-500'>Plant: {name}</p>
                 </div>
                 <div className='mt-2'>
-                  <p className='text-sm text-gray-500'>Category: Indoor</p>
+                  <p className='text-sm text-gray-500'>Category: {category}</p>
                 </div>
                 <div className='mt-2'>
-                  <p className='text-sm text-gray-500'>Customer: PH</p>
+                  <p className='text-sm text-gray-500'>Customer: {user?.displayName}</p>
                 </div>
 
                 <div className='mt-2'>
-                  <p className='text-sm text-gray-500'>Price: $ 120</p>
+                  <p className='text-sm text-gray-500'>Price: $ {price}</p>
                 </div>
                 <div className='mt-2'>
-                  <p className='text-sm text-gray-500'>Available Quantity: 5</p>
+                  <p className='text-sm text-gray-500'>Available Quantity: {quantity}</p>
+                </div>
+                <div className='flex space-y-2 items-center gap-2 text-sm'>
+                  <label htmlFor='quantity' className='block text-gray-600'>
+                    Quantity:
+                  </label>
+                  <input
+                    className='px-4 py-3 text-gray-800 border border-lime-300 focus:outline-lime-500 rounded-md bg-white'
+                    name='quantity'
+                    id='quantity'
+                    type='number'
+                    max={quantity}
+                    min={1}
+                    value={totalQuantity}
+                    onChange={(e) => handleQuantity(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className='space-y-2 flex items-center gap-2 text-sm'>
+                  <label htmlFor='name' className='block text-gray-600'>
+                    Address:
+                  </label>
+                  <input
+                    className='px-4 py-3 text-gray-800 border border-lime-300 focus:outline-lime-500 rounded-md bg-white'
+                    name='name'
+                    id='name'
+                    type='text'
+                    placeholder='shipping address'
+                    required
+                  />
                 </div>
               </DialogPanel>
             </TransitionChild>
@@ -69,4 +119,4 @@ const PurchaseModal = ({ closeModal, isOpen }) => {
   )
 }
 
-export default PurchaseModal
+export default PurchaseModal;
