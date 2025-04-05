@@ -6,29 +6,35 @@ import {
   DialogPanel,
   DialogTitle,
 } from '@headlessui/react'
-import { Fragment, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import useAuth from '../../hooks/useAuth';
 import toast from 'react-hot-toast';
+import Button from '../Shared/Button/Button';
 
 const PurchaseModal = ({ closeModal, isOpen, plant }) => {
   const { user } = useAuth();
   const { name, category, quantity, price } = plant;
   const [totalQuantity, setTotalQuantity] = useState(1);
+  const [totalPrice, setTotalPrice] = useState(price);
 
   const handleQuantity = (q) => {
     // Convert input value to number and handle empty input
     const quantityNumber = q === "" ? "" : Number(q);
-
+    // setTotalPrice(quantityNumber && quantityNumber * price)
     if (quantityNumber === "") {
       setTotalQuantity(""); // Allow empty input temporarily
+      setTotalPrice(0)
     } else if (quantityNumber > quantity) {
       toast.error("Total quantity exceeded!");
       setTotalQuantity(quantity);
+      setTotalPrice(quantity * price)
     } else if (quantityNumber < 1) {
       toast.error("Quantity cannot be less than 1!");
       setTotalQuantity(1);
+      setTotalPrice(price)
     } else {
       setTotalQuantity(quantityNumber);
+      setTotalPrice(quantityNumber * price)
     }
   };
 
@@ -109,6 +115,9 @@ const PurchaseModal = ({ closeModal, isOpen, plant }) => {
                     placeholder='shipping address'
                     required
                   />
+                </div>
+                <div className='mt-2'>
+                  <Button label={`Pay $${totalPrice}`}></Button>
                 </div>
               </DialogPanel>
             </TransitionChild>
